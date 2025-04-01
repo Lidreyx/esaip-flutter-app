@@ -29,6 +29,13 @@ In VS Code, the project will be created with all the system folders:
 - linux
 - macos
 - web
-- windows
+
+## Requirement
+
+to run the app you have to make a modification on the pubspec.yaml
+
+at the line 12 after :   sdk: flutter
+add   sensors_plus: ^3.0.0 
+at the same level of identation as flutter: 
 
 Remove the folders you don't need.
