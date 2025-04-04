@@ -7,6 +7,10 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+<<<<<<< Updated upstream
+=======
+  const MyApp({Key? key}) : super(key: key);
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,7 +24,11 @@ class MyApp extends StatelessWidget {
 }
 
 class AccelerometerExample extends StatefulWidget {
+<<<<<<< Updated upstream
   const AccelerometerExample({super.key});
+=======
+  const AccelerometerExample({Key? key}) : super(key: key);
+>>>>>>> Stashed changes
 
   @override
   State<AccelerometerExample> createState() => _AccelerometerExampleState();
