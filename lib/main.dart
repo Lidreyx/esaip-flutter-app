@@ -36,7 +36,7 @@ class _AccelerometerExampleState extends State<AccelerometerExample> {
     super.initState();
 
     // Écoute les événements de l'accéléromètre
-    _accelerometerSubscription = accelerometerEvents.listen((event) {
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
       setState(() {
         _accelerometerEvent = event;
       });
