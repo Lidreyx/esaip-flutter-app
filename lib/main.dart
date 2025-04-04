@@ -15,10 +15,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isDarkMode = true;
+  String _temperatureUnit = "Celsius"; // Stocke l'unité actuelle
 
-  void _toggleTheme() {
+  void _toggleTheme(bool isDark) {
     setState(() {
-      _isDarkMode = !_isDarkMode;
+      _isDarkMode = isDark;
+    });
+  }
+
+  void _setTemperatureUnit(String unit) {
+    setState(() {
+      _temperatureUnit = unit;
     });
   }
 
@@ -34,7 +41,12 @@ class _MyAppState extends State<MyApp> {
           title: 'Flutter Demo',
           theme: ThemeData.light(),
           darkTheme: ThemeData.dark(),
-          home: HomePage(isDarkMode: _isDarkMode, toggleTheme: _toggleTheme),
+          home: HomePage(
+            isDarkMode: _isDarkMode,
+            onThemeChanged: _toggleTheme,
+            temperatureUnit: _temperatureUnit,
+            onUnitChanged: _setTemperatureUnit, // On passe cette fonction à HomePage
+          ),
         );
       },
     );

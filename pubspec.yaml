@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
   fl_chart: ^0.63.0  # Ajout correct de la dépendance
+  shared_preferences: ^2.0.11
+
+
 
 
   # The following adds the Cupertino Icons font to your application.

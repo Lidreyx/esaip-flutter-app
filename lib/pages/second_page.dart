@@ -1,60 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'user_page.dart';
 
 class SecondPage extends StatefulWidget {
-  const SecondPage({super.key, required this.isDarkMode, required this.toggleTheme});
-
   final bool isDarkMode;
-  final VoidCallback toggleTheme;
+  final ValueChanged<bool> onThemeChanged;
+  final String temperatureUnit;
+  final ValueChanged<String> onUnitChanged;
+
+  const SecondPage({
+    super.key,
+    required this.isDarkMode,
+    required this.onThemeChanged,
+    required this.temperatureUnit,
+    required this.onUnitChanged,
+  });
 
   @override
   State<SecondPage> createState() => _SecondPageState();
 }
 
 class _SecondPageState extends State<SecondPage> {
+  late String selectedUnit;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedUnit = widget.temperatureUnit;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Paramètres"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person), // Icône bonhomme
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UserPage(
-                    isDarkMode: widget.isDarkMode,
-                    toggleTheme: widget.toggleTheme,
-                  ),
-                ),
-              );
-            },
-            tooltip: "Page utilisateur",
-          ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, selectedUnit);
+          },
+        ),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 50.h), // Espace sous le titre
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Mode sombre",
-                  style: TextStyle(fontSize: 18.sp),
-                ),
-                SizedBox(width: 10.w),
+                const Text("Mode sombre"),
                 Switch(
                   value: widget.isDarkMode,
-                  onChanged: (value) => widget.toggleTheme(),
+                  onChanged: widget.onThemeChanged,
                 ),
               ],
+            ),
+            const SizedBox(height: 20),
+            const Text("Unité de température"),
+            DropdownButton<String>(
+              value: selectedUnit,
+              items: const [
+                DropdownMenuItem(value: "Celsius", child: Text("Celsius")),
+                DropdownMenuItem(value: "Fahrenheit", child: Text("Fahrenheit")),
+              ],
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    selectedUnit = newValue;
+                  });
+                  widget.onUnitChanged(newValue);
+                }
+              },
             ),
           ],
         ),

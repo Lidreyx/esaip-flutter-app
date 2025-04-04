@@ -1,129 +1,166 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fl_chart/fl_chart.dart'; // Import pour fl_chart
 import 'second_page.dart';
-import 'dart:convert'; // Pour parser le JSON (utile plus tard)
+import 'user_page.dart';
+import 'thing_detail_page.dart'; 
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.isDarkMode, required this.toggleTheme});
-
   final bool isDarkMode;
-  final VoidCallback toggleTheme;
+  final ValueChanged<bool> onThemeChanged;
+  final String temperatureUnit;
+  final ValueChanged<String> onUnitChanged;
+
+  const HomePage({
+    super.key,
+    required this.isDarkMode,
+    required this.onThemeChanged,
+    required this.temperatureUnit,
+    required this.onUnitChanged,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Liste des données simulées
-  List<Map<String, dynamic>> sensorData = [
-    {"name": "Température", "value": "22°C"},
-    {"name": "Humidité", "value": "55%"},
-    {"name": "Pression", "value": "1013 hPa"},
-  ];
+  double temperatureValue = 22.0; // Stocke la température en °C
+  String selectedSensor = 'Tous'; // Valeur par défaut
+  List<String> sensors = ['Tous', 'Température', 'Humidité', 'Accelération']; // Liste des capteurs
 
-  // Fonction simulée pour récupérer des données JSON (à remplacer par les vraies données plus tard)
-  void fetchSensorData() {
-    String jsonData = '''
-      [
-        {"name": "Température", "value": "23°C"},
-        {"name": "Humidité", "value": "58%"},
-        {"name": "Pression", "value": "1011 hPa"}
-      ]
-    ''';
-
-    setState(() {
-      sensorData = List<Map<String, dynamic>>.from(json.decode(jsonData));
-    });
+  // Fonction de conversion Celsius → Fahrenheit
+  String _formatTemperature(double celsius, String unit) {
+    if (unit == "Fahrenheit") {
+      double fahrenheit = (celsius * 9 / 5) + 32;
+      return "${fahrenheit.toStringAsFixed(1)}°F";
+    }
+    return "${celsius.toStringAsFixed(1)}°C";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Données des capteurs'),
+        title: const Text('Accueil'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh), // Icône de rafraîchissement
-            onPressed: fetchSensorData,
-            tooltip: "Rafraîchir les données",
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              final selectedUnit = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SecondPage(
+                    isDarkMode: widget.isDarkMode,
+                    onThemeChanged: widget.onThemeChanged,
+                    temperatureUnit: widget.temperatureUnit,
+                    onUnitChanged: widget.onUnitChanged,
+                  ),
+                ),
+              );
+
+              if (selectedUnit != null) {
+                setState(() {}); // Force le rebuild après un changement d'unité
+              }
+            },
           ),
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.person),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SecondPage(
-                    isDarkMode: widget.isDarkMode, 
-                    toggleTheme: widget.toggleTheme,
+                  builder: (_) => UserPage(
+                    isDarkMode: widget.isDarkMode,
+                    onThemeChanged: widget.onThemeChanged,
                   ),
                 ),
               );
             },
-            tooltip: "Paramètres",
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: sensorData.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
-                    child: ListTile(
-                      title: Text(sensorData[index]["name"]),
-                      subtitle: Text(sensorData[index]["value"]),
-                      leading: const Icon(Icons.sensors),
-                    ),
-                  );
-                },
-              ),
+      body: Column(
+        children: [
+          // Ajout du filtre de sélection des capteurs
+          DropdownButton<String>(
+            value: selectedSensor,
+            items: sensors.map((String sensor) {
+              return DropdownMenuItem<String>(
+                value: sensor,
+                child: Text(sensor),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedSensor = newValue!;
+              });
+            },
+          ),
+          Expanded(
+            child: ListView(
+              children: getFilteredSensors().map((sensor) {
+                return Card(
+                  child: ListTile(
+                    title: Text(sensor),
+                    subtitle: Text(getSensorValue(sensor)),
+                    trailing: getSensorIcon(sensor),
+                    onTap: () {
+                      // Naviguer vers ThingDetailPage en passant les détails du capteur
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ThingDetailPage(
+                            thing: {
+                              "name": sensor,
+                              "type": sensor, // Vous pouvez adapter cela selon vos besoins
+                              "value": getSensorValue(sensor), // Valeur actuelle du capteur
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
             ),
-            SizedBox(height: 20.h), // Espacement avant le graphique
-            const Text(
-              "Évolution Température & Humidité :",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10.h),
-            Expanded(
-              child: LineChart(
-                LineChartData(
-                  titlesData: FlTitlesData(show: true),
-                  borderData: FlBorderData(show: true),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: [
-                        const FlSpot(1, 22),
-                        const FlSpot(2, 24),
-                        const FlSpot(3, 21.8),
-                      ],
-                      isCurved: true,
-                      color: Colors.blue, // Température
-                      barWidth: 4,
-                    ),
-                    LineChartBarData(
-                      spots: [
-                        const FlSpot(1, 60),
-                        const FlSpot(2, 55),
-                        const FlSpot(3, 62),
-                      ],
-                      isCurved: true,
-                      color: Colors.green, // Humidité
-                      barWidth: 4,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+
+  // Récupère les capteurs filtrés selon la sélection
+  List<String> getFilteredSensors() {
+    if (selectedSensor == 'Tous') {
+      return sensors.sublist(1); // Exclut "Tous" et retourne les capteurs
+    } else {
+      return [selectedSensor]; // Retourne uniquement le capteur sélectionné
+    }
+  }
+
+  // Retourne la valeur du capteur
+  String getSensorValue(String sensor) {
+    switch (sensor) {
+      case 'Température':
+        return "Valeur: ${_formatTemperature(temperatureValue, widget.temperatureUnit)}";
+      case 'Humidité':
+        return "Valeur: 45%"; // Remplacez par la valeur réelle
+      case 'Accelération':
+        return "Valeur: 1 m/s"; // Remplacez par la valeur réelle
+      default:
+        return "";
+    }
+  }
+
+  // Retourne l'icône du capteur
+  Icon getSensorIcon(String sensor) {
+    switch (sensor) {
+      case 'Température':
+        return const Icon(Icons.thermostat);
+      case 'Humidité':
+        return const Icon(Icons.water_drop);
+      case 'Accelération':
+        return const Icon(Icons.speed);
+      default:
+        return const Icon(Icons.help); // Icône par défaut
+    }
   }
 }
