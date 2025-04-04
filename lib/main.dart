@@ -1,16 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-<<<<<<< Updated upstream
-=======
   const MyApp({Key? key}) : super(key: key);
->>>>>>> Stashed changes
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,70 +14,68 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
       ),
       debugShowCheckedModeBanner: false,
-      home: AccelerometerExample(),
+      home: AccelerometerSimulation(),
     );
   }
 }
 
-class AccelerometerExample extends StatefulWidget {
-<<<<<<< Updated upstream
-  const AccelerometerExample({super.key});
-=======
-  const AccelerometerExample({Key? key}) : super(key: key);
->>>>>>> Stashed changes
+class AccelerometerSimulation extends StatefulWidget {
+  const AccelerometerSimulation({Key? key}) : super(key: key);
 
   @override
-  State<AccelerometerExample> createState() => _AccelerometerExampleState();
+  State<AccelerometerSimulation> createState() =>
+      _AccelerometerSimulationState();
 }
 
-class _AccelerometerExampleState extends State<AccelerometerExample> {
-  // Variable pour stocker la dernière valeur de l'accéléromètre
-  AccelerometerEvent? _accelerometerEvent;
-  late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Écoute les événements de l'accéléromètre
-    _accelerometerSubscription = accelerometerEventStream().listen((event) {
-      setState(() {
-        _accelerometerEvent = event;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    // Annule l'abonnement pour éviter les fuites de mémoire
-    _accelerometerSubscription.cancel();
-    super.dispose();
-  }
+class _AccelerometerSimulationState extends State<AccelerometerSimulation> {
+  double _acceleration = 0.0; // Valeur du slider (accélération en m/s²)
+  double _velocity = 0.0; // Vitesse en m/s
+  double _velocityKmh = 0.0; // Vitesse en km/h
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Accelerometer Example'),
+        title: Text('Simulated Speed (km/h)'),
       ),
-      body: Center(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'Accelerometer Data:',
+              'Simulated Speed:',
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 10),
-            if (_accelerometerEvent != null)
-              Text(
-                'X: ${_accelerometerEvent!.x.toStringAsFixed(2)}, '
-                'Y: ${_accelerometerEvent!.y.toStringAsFixed(2)}, '
-                'Z: ${_accelerometerEvent!.z.toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 16),
-              )
-            else
-              Text('No data available', style: TextStyle(fontSize: 16)),
+
+            // Affichage de la vitesse
+            Text(
+              '${_velocityKmh.toStringAsFixed(2)} km/h',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: 30),
+
+            // Slider pour modifier l’accélération
+            Text("Acceleration (m/s²)", style: TextStyle(fontSize: 16)),
+            Slider(
+              value: _acceleration,
+              min: -5,
+              max: 5,
+              divisions: 40,
+              label: _acceleration.toStringAsFixed(1),
+              onChanged: (value) {
+                setState(() {
+                  _acceleration = value;
+
+                  // Simule une mise à jour de la vitesse toutes les 0.1 secondes
+                  _velocity += _acceleration * 0.1; // v = v0 + at
+                  _velocityKmh = _velocity * 3.6; // Conversion en km/h
+                });
+              },
+            ),
           ],
         ),
       ),
