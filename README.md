@@ -9,13 +9,9 @@ SPDX-License-Identifier: MIT
 
 ## Table of contents
 
-- [Table of contents](#table-of-contents)
-- [Presentation](#presentation)
-- [Create your app](#create-your-app)
-
 ## Presentation
 
-This is the base repository for your flutter applications.
+An app that simulate an accelerometer senson
 
 ## Create your app
 
@@ -32,4 +28,13 @@ In VS Code, the project will be created with all the system folders:
 - web
 - windows
 
-Remove the folders you don't need.
+## requirement
+
+modification to the pubspec.yaml are necessary to use this app
+
+make sure that the depenedencie part of the files looks like this :
+
+  fl_chart: ^0.70.2
+  flutter:
+    sdk: flutter
+  sensors_plus: ^6.1.1
